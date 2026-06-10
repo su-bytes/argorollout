@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: blue-green-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/su-bytes/argorollout.git
+    targetRevision: main
+    path: helm-chart/blue-green-app
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: blue-green
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

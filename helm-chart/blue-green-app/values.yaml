@@ -1,0 +1,20 @@
+replicaCount: 2
+
+blueVersion:
+  image: "nginx"
+  tag: "1.19"
+  port: 8001
+
+greenVersion:
+  image: "nginx"
+  tag: "1.21"
+  port: 8002
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+app:
+  name: blue-green-app
+  activeVersion: blue

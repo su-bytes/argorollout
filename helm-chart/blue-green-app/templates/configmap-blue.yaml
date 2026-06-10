@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.app.name }}-blue-config
+  namespace: {{ .Release.Namespace }}
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <body style="background-color: #0066cc; color: white; font-family: Arial; text-align: center; padding-top: 50px;">
+    <h1>🔵 BLUE VERSION (v1)</h1>
+    <p>Nginx Version: 1.19</p>
+    <p>Active: <strong id="status">Loading...</strong></p>
+    <script>
+      fetch('/health')
+        .then(r => r.text())
+        .then(t => document.getElementById('status').textContent = 'Yes - Traffic is routed here')
+        .catch(e => document.getElementById('status').textContent = 'No - Traffic not here');
+    </script>
+    </body>
+    </html>
+  nginx.conf: |
+    user nginx;
+    worker_processes auto;
+    events { worker_connections 1024; }
+    http {
+      server {
+        listen 8080;
+        root /usr/share/nginx/html;
+        location / { try_files $uri $uri/ /index.html; }
+        location /health { return 200 "ok"; }
+      }
+    }

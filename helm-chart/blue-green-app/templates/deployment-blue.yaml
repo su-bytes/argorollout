@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}-blue
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.app.name }}
+    version: blue
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}
+        version: blue
+    spec:
+      containers:
+      - name: app
+        image: "{{ .Values.blueVersion.image }}:{{ .Values.blueVersion.tag }}"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+        volumeMounts:
+        - name: config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        - name: html
+          mountPath: /usr/share/nginx/html
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 3
+          periodSeconds: 3
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Values.app.name }}-blue-config
+      - name: html
+        configMap:
+          name: {{ .Values.app.name }}-blue-config
+          items:
+          - key: index.html
+            path: index.html
